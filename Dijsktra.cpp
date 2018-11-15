@@ -1,51 +1,89 @@
 #include <stdio.h>
-#include <vector>
-#include <queue>
-using namespace std;
+#include <limits.h>
+#define INFINITY 9999
+#define MAX 100
 
-const int oo = 1000111000;
-typedef pair<int, int> ii;
+int G[MAX][MAX], i, j, n, u;
+int c[MAX][MAX], d[MAX], trace[MAX];
+int free[MAX], count, min, next;
 
-vector <ii> a[2309];
-int n, m;
+void LoadGraph()
+{
+	printf("Nhap so dinh: "); scanf("%d", &n);
+    printf("Nhap ma tran khoang cach:\n");
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            scanf("%d",&G[i][j]);
+//    printf("\nNhap dinh bat dau: ");
+//    scanf("%d", &u);
+} 
 
-int d[2309];
-
-void dijkstra(){
-    priority_queue <ii, vector<ii>, greater<ii> > pq;
-    int i, u, v, du, uv;
-
-    for (i=1; i<=n; i++) d[i] = oo;
-    d[1] = 0;
-    pq.push(ii(0, 1));
-
-    while (pq.size()){
-        u=pq.top().second;
-        du=pq.top().first;
-        pq.pop();
-        if (du!=d[u]) continue;
-
-        for (i=0; v=a[u][i].second; i++)
-        {
-            uv=a[u][i].first;
-            if (d[v]>du+uv) {
-                d[v]=du+uv;
-                pq.push(ii(d[v], v));
-            }
-        }
+void Init(int s)
+{
+	for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            if (G[i][j] == 0) c[i][j] = INFINITY;
+            else c[i][j] = G[i][j];
+    for(i = 0; i < n; i++)
+    {
+        d[i] = c[s][i];
+        trace[i] = s;
+        free[i] = 0;
     }
-
 }
 
-main(){
-    int p, q, i, m, w;
-    scanf("%d%d", &n, &m);
-    while (m--){
-        scanf("%d%d%d", &p, &q, &w);
-        a[p].push_back(ii(w, q));
-        a[q].push_back(ii(w, p));
+void Dijkstra(int G[MAX][MAX], int n, int s)
+{
+    d[s] = 0;
+    free[s] = 1;
+    count = 1;
+    while (count < n-1)
+    {
+        min = INFINITY;
+        for (i = 0; i < n; i++)
+            if ((d[i] < min) && (!free[i]))
+            {
+                min = d[i];
+                next = i;
+            }
+            free[next] = 1;
+            for (i = 0; i < n; i++)
+                if (!free[i])
+                    if (min + c[next][i] < d[i])
+                    {
+                        d[i] = min + c[next][i];
+                        trace[i] = next;
+                    }
+        count++;
     }
-    for (i=1; i<=n; i++) a[i].push_back(ii(0,0));
-    dijkstra();
-    for (i=1; i<=n; i++) printf("d( 1 -> %d ) = %d\n", i, d[i]);
+}
+
+void PrintResult(int s)
+{
+	for (i = 0; i < n; i++)
+        if (i != s)
+        {
+            printf("\nKhoang cach den dinh %d = %d", i, d[i]);
+            printf("\nDuong di: %d",i);
+            j = i;
+            do
+            {
+                j = trace[j];
+                printf(" <- %d", j);
+            }
+			while (j != s);
+    }
+}
+
+int main()
+{
+	LoadGraph();
+	for (u = 0; u < n; u++)
+	{
+		printf("\nKhoang cach tu dinh %d den cac dinh con lai:\n", u);
+		Init(u);
+	    Dijkstra(G, n, u);
+	    PrintResult(u);
+	    printf("\n");
+	}
 }
